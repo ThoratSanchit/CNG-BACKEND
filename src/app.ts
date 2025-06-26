@@ -3,13 +3,20 @@ import pino from "pino";
 import dotenv from "dotenv";
 import cors from "@fastify/cors";
 import { connectToMongoDB } from "./config/mongoDbConfig";
-import { sequelize, checkDatabaseConnection } from "./plugins/sequelize";
+import {userProfileRoutes} from "./routers/user-profile.route"
+import pumpRoutes from "./routers/pump.route";
 
 dotenv.config();
+
 
 const app = fastify({
   logger: pino({ level: "info" }),
 });
+
+app.register(userProfileRoutes, { prefix: "/api/user-profile" });
+app.register(pumpRoutes, { prefix: "/api/pump" });
+
+
 dotenv.config();
 app.register(cors, {
   origin: "*",
@@ -25,9 +32,8 @@ app.get("/health", async (request, reply) => {
   reply.send({ message: "Health is ok..." });
 });
 
-sequelize.sync();
 
-let port = Number(process.env.PORT) || 4000;
+
 const start = async () => {
   try {
     const dbStatus = await connectToMongoDB();
